@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="The Rule">
+  <title>The Rule — Liturgical Companion</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Cormorant Garamond & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body {
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .font-serif-sacred {
+      font-family: var(--font-serif);
+    }
+    /* Theme: Monastic Candlelight (OLED Black + Soft Amber) */
+    body.theme-candlelight {
+      background-color: #000000;
+      color: #e6c594;
+    }
+    body.theme-candlelight .card {
+      background-color: #0c0b09;
+      border: 1px solid #282117;
+      box-shadow: 0 0 16px rgba(230, 197, 148, 0.02);
+    }
+    body.theme-candlelight .subtle-bg {
+      background-color: #16130e;
+    }
+    body.theme-candlelight .nav-bar {
+      background-color: rgba(12, 11, 9, 0.94);
+      border-color: #282117;
+    }
+    body.theme-candlelight input,
+    body.theme-candlelight select,
+    body.theme-candlelight textarea {
+      background-color: #14120e !important;
+      color: #e6c594 !important;
+      border-color: #382c1d !important;
+    }
+
+    /* Theme: Light Parchment */
+    body.theme-light {
+      background-color: #f7f6f1;
+      color: #1f1b16;
+    }
+    body.theme-light .card {
+      background-color: #ffffff;
+      border: 1px solid #e7e4dc;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    body.theme-light .subtle-bg {
+      background-color: #efece4;
+    }
+    body.theme-light .nav-bar {
+      background-color: rgba(255, 255, 255, 0.92);
+      border-color: #e7e4dc;
+    }
+
+    /* Theme: Deep Slate */
+    body.theme-dark {
+      background-color: #0f1013;
+      color: #e2e4e9;
+    }
+    body.theme-dark .card {
+      background-color: #16171d;
+      border: 1px solid #272832;
+    }
+    body.theme-dark .subtle-bg {
+      background-color: #1f2029;
+    }
+    body.theme-dark .nav-bar {
+      background-color: rgba(22, 23, 29, 0.94);
+      border-color: #272832;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="theme-candlelight min-h-screen flex flex-col pb-24 transition-colors duration-200">
+
+  <!-- TOP APP BAR -->
+  <header class="sticky top-0 z-40 backdrop-blur-md border-b nav-bar px-4 py-2.5 transition-colors">
+    <div class="max-w-xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <span class="text-amber-500 text-lg">✝</span>
+        <div>
+          <h1 class="text-base font-serif-sacred font-bold tracking-wider uppercase leading-none">The Rule</h1>
+          <p id="header-date" class="text-[11px] opacity-65 leading-tight mt-0.5">...</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="btn-test-chime" title="Test 5-min chime" class="p-2 rounded-xl subtle-bg hover:opacity-80 transition text-xs flex items-center">
+          <span>🔔</span>
+        </button>
+        <button id="btn-cycle-theme" title="Switch Theme" class="p-2 rounded-xl subtle-bg hover:opacity-80 transition text-xs">
+          <span id="theme-icon">🕯️</span>
+        </button>
+        <button id="btn-open-settings" title="Settings" class="p-2 rounded-xl subtle-bg hover:opacity-80 transition text-xs">
+          ⚙️
+        </button>
+      </div>
+    </div>
+    <!-- Liturgical Season & Vigil Ribbon -->
+    <div class="max-w-xl mx-auto mt-1 flex items-center justify-between text-[11px] pt-1.5 border-t border-stone-800/40">
+      <div class="flex items-center space-x-2 truncate">
+        <span id="liturgical-color-dot" class="w-2 h-2 rounded-full inline-block bg-emerald-500"></span>
+        <span id="liturgical-season-label" class="font-medium truncate">Ordinary Time</span>
+      </div>
+      <span id="vigil-today-badge" class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-amber-900/60 text-amber-300 hidden">
+        Vigil Night
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-xl mx-auto w-full px-4 pt-3.5 space-y-4">
+
+    <!-- TAB 1: DAILY OFFICE & RULE OF FASTING -->
+    <section id="view-office" class="space-y-3.5">
+      
+      <!-- Current Active Prayer Time Card -->
+      <div class="card p-4 rounded-2xl">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Current Prayer Office</span>
+              <span id="badge-vigil-duty" class="hidden text-[9px] px-1.5 py-0.2 rounded font-bold uppercase bg-amber-900/60 text-amber-200">Appointed Feast</span>
+            </div>
+            <div class="flex items-center space-x-2 mt-1">
+              <span id="active-office-icon" class="text-2xl">☀️</span>
+              <h2 id="active-office-title" class="text-xl font-bold font-serif-sacred">Morning Prayer</h2>
+            </div>
+            <p id="active-office-time" class="text-xs opacity-75 mt-0.5">Appointed Hour: 7:00 AM</p>
+          </div>
+          <button id="btn-complete-active-office" class="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs transition flex items-center space-x-1.5 shadow">
+            <span>✓</span><span>Mark Done</span>
+          </button>
+        </div>
+
+        <!-- 5-Minute Chime Alert Indicator -->
+        <div class="mt-3.5 pt-2.5 border-t border-stone-200/10 flex items-center justify-between text-xs">
+          <div class="flex items-center space-x-1.5 opacity-80">
+            <span>⏳</span>
+            <span id="chime-status-hint">Chime sounds 5 min before hour (Mon–Fri)</span>
+          </div>
+          <span id="next-chime-time" class="font-mono text-[11px] font-bold text-amber-500">--:--</span>
+        </div>
+      </div>
+
+      <!-- Quick Office Completion Grid (Only displays Vigils when appointed) -->
+      <div id="office-grid-container" class="grid grid-cols-4 gap-1.5 text-center text-xs">
+        <!-- Rendered dynamically depending on whether Vigils is kept today -->
+      </div>
+
+      <!-- Daily Lectionary Readings (Citations Only) -->
+      <div class="card p-4 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Daily Lectionary Citations</h3>
+          <span class="text-[10px] opacity-60">BCP 2019 Cycle</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="subtle-bg p-2.5 rounded-xl space-y-1">
+            <span class="font-bold text-[11px] block text-stone-500">Morning Office</span>
+            <p class="font-semibold" id="reading-morning-psalm">Psalms: 19, 20</p>
+            <p class="opacity-80 text-[11px]" id="reading-morning-lessons">1st: 1 Kings 8 | 2nd: Eph 4</p>
+          </div>
+          <div class="subtle-bg p-2.5 rounded-xl space-y-1">
+            <span class="font-bold text-[11px] block text-stone-500">Evening Office</span>
+            <p class="font-semibold" id="reading-evening-psalm">Psalms: 21, 22</p>
+            <p class="opacity-80 text-[11px]" id="reading-evening-lessons">1st: 1 Kings 9 | 2nd: Luke 14</p>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold opacity-70 mb-1">Personal Reading / Lectio Scripture for Today</label>
+          <input type="text" id="input-personal-reading" placeholder="e.g. Philippians 2:1-11 or Bernard of Clairvaux Sermon..." class="w-full text-xs p-2.5 rounded-xl border border-stone-300 dark:border-stone-800 subtle-bg focus:outline-none">
+        </div>
+      </div>
+
+      <!-- SECTION 7.1: RULE OF SELF-DENIAL & FASTING -->
+      <div class="card p-4 rounded-2xl space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-lg">🐟</span>
+            <span class="font-bold font-serif-sacred text-sm">Rule of Life · Self-Denial</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span id="fast-rule-number" class="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-amber-900/50 text-amber-200">7.1</span>
+            <button id="btn-toggle-fast-exempt" class="px-2 py-0.5 rounded text-[11px] border border-stone-700 subtle-bg hover:opacity-80">
+              Exempt
+            </button>
+          </div>
+        </div>
+        
+        <div class="subtle-bg p-3 rounded-xl space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span id="fast-title" class="font-bold text-xs">Friday Partial Fast</span>
+            <span id="fast-pill" class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase bg-amber-900/60 text-amber-300">Fast Day</span>
+          </div>
+          <p id="fast-rule-quote" class="text-[11px] leading-relaxed italic opacity-90">
+            "7.1.2. I shall observe a partial fast on all Fridays (Except in Christmastide and Eastertide), as health permits."
+          </p>
+          <p id="fast-clarification" class="text-[10px] opacity-60">
+            Self-denial / abstinence from flesh meat. As health permits.
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 2: MASS TRACKER -->
+    <section id="view-mass" class="hidden space-y-3.5">
+      <div class="card p-4 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-serif-sacred font-bold">Holy Mass / Eucharist</h2>
+            <p class="text-xs opacity-65">Record attendance at the Holy Sacrifice</p>
+          </div>
+          <button id="btn-log-mass-today" class="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs shadow transition">
+            + Attended Mass Today
+          </button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 text-center pt-1">
+          <div class="subtle-bg p-2.5 rounded-xl">
+            <span class="text-xl font-bold block font-mono" id="mass-count-year">0</span>
+            <span class="text-[9px] uppercase font-bold opacity-60">This Year</span>
+          </div>
+          <div class="subtle-bg p-2.5 rounded-xl">
+            <span class="text-xl font-bold block font-mono" id="mass-count-month">0</span>
+            <span class="text-[9px] uppercase font-bold opacity-60">This Month</span>
+          </div>
+          <div class="subtle-bg p-2.5 rounded-xl">
+            <span class="text-xl font-bold block font-mono" id="mass-count-total">0</span>
+            <span class="text-[9px] uppercase font-bold opacity-60">Total Logged</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 rounded-2xl space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500">Recent Eucharists Attended</h3>
+        <div id="mass-history-list" class="space-y-1.5 text-xs">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: RULE OF LIFE DISCIPLINES -->
+    <section id="view-rule" class="hidden space-y-3.5">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-serif-sacred font-bold">Rule of Life Disciplines</h2>
+          <p class="text-xs opacity-65">Cadenced spiritual commitments.</p>
+        </div>
+        <button id="btn-quick-tithing-modal" class="px-2.5 py-1.5 rounded-xl subtle-bg font-medium text-xs hover:opacity-80">
+          💸 Log Tithe
+        </button>
+      </div>
+
+      <!-- Disciplines Cards Container -->
+      <div id="disciplines-container" class="space-y-2">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Tithing & Almsgiving Log -->
+      <div class="card p-3.5 rounded-2xl space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span>🪙</span>
+            <span class="font-bold">Tithing & Almsgiving Log</span>
+          </div>
+          <span class="font-mono text-amber-500 font-bold" id="tithing-total-ytd">$0.00 YTD</span>
+        </div>
+        <div id="tithing-recent-list" class="space-y-1 text-[11px] opacity-80">
+          <!-- Recent tithes -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PRAYER LIST / INTENTIONS -->
+    <section id="view-prayers" class="hidden space-y-3.5">
+      <div class="card p-4 rounded-2xl space-y-3">
+        <div>
+          <h2 class="text-base font-serif-sacred font-bold">Prayer Intentions</h2>
+          <p class="text-xs opacity-65">Intercessions, souls, and petitions.</p>
+        </div>
+
+        <div class="flex space-x-2">
+          <input type="text" id="input-new-prayer" placeholder="Name or petition..." class="flex-grow text-xs p-2.5 rounded-xl border border-stone-300 dark:border-stone-800 subtle-bg focus:outline-none">
+          <select id="select-prayer-category" class="text-xs p-2 rounded-xl border border-stone-300 dark:border-stone-800 subtle-bg">
+            <option value="Living">Living</option>
+            <option value="Sick">Sick</option>
+            <option value="Departed">Departed</option>
+            <option value="Special">Special</option>
+          </select>
+          <button id="btn-add-prayer" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition">
+            Add
+          </button>
+        </div>
+      </div>
+
+      <div class="card p-4 rounded-2xl space-y-2">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-500">Active Petitions</span>
+          <span class="text-[10px] opacity-60" id="prayer-count-label">0 petitions</span>
+        </div>
+        <div id="prayer-items-list" class="space-y-1.5 text-xs">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: TRACKING & CHARTS -->
+    <section id="view-charts" class="hidden space-y-3.5">
+      <div class="card p-4 rounded-2xl space-y-4">
+        <div>
+          <h2 class="text-base font-serif-sacred font-bold">Prayer Consistency (Past 7 Days)</h2>
+          <p class="text-xs opacity-65">Offices kept each day.</p>
+        </div>
+        <div class="w-full h-40 subtle-bg rounded-xl p-2 flex items-center justify-center">
+          <canvas id="chart-canvas" class="w-full h-full"></canvas>
+        </div>
+
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold uppercase tracking-wider opacity-70">30-Day Rhythm</span>
+            <span class="text-[10px] opacity-60">Gold = Offices completed</span>
+          </div>
+          <div id="heatmap-grid" class="grid grid-cols-10 gap-1 subtle-bg p-2.5 rounded-xl">
+            <!-- 30 boxes -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 border-t nav-bar backdrop-blur-md">
+    <div class="max-w-xl mx-auto flex items-center justify-around text-[10px] font-medium py-2 px-1">
+      <button class="nav-tab flex flex-col items-center space-y-0.5 text-amber-500" data-target="view-office">
+        <span class="text-base">📖</span>
+        <span>Office</span>
+      </button>
+      <button class="nav-tab flex flex-col items-center space-y-0.5 opacity-60 hover:opacity-100" data-target="view-mass">
+        <span class="text-base">☩</span>
+        <span>Mass</span>
+      </button>
+      <button class="nav-tab flex flex-col items-center space-y-0.5 opacity-60 hover:opacity-100" data-target="view-rule">
+        <span class="text-base">⚖️</span>
+        <span>Rule</span>
+      </button>
+      <button class="nav-tab flex flex-col items-center space-y-0.5 opacity-60 hover:opacity-100" data-target="view-prayers">
+        <span class="text-base">🕊️</span>
+        <span>Prayers</span>
+      </button>
+      <button class="nav-tab flex flex-col items-center space-y-0.5 opacity-60 hover:opacity-100" data-target="view-charts">
+        <span class="text-base">📊</span>
+        <span>Chart</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- SETTINGS MODAL -->
+  <div id="modal-settings" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="card max-w-md w-full p-5 rounded-2xl max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex items-center justify-between border-b border-stone-700/40 pb-2">
+        <h3 class="font-serif-sacred text-lg font-bold">Rule Settings & Times</h3>
+        <button id="btn-close-settings" class="text-stone-400 hover:text-white text-base">✕</button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+
+        <!-- Vigil Configuration in Settings -->
+        <div class="subtle-bg p-3 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold flex items-center space-x-1.5">
+              <span>🌙</span><span>Vigil Settings</span>
+            </span>
+            <span class="text-[10px] opacity-60">Feast-days only</span>
+          </div>
+          <p class="text-[10px] opacity-75">
+            Vigils are kept for St. Vincent of Saragossa, Corpus Christi, St. Clare, St. Mary the Virgin, St. Thérèse, & St. Francis.
+          </p>
+          <div class="pt-1">
+            <label class="text-[10px] opacity-75 block mb-1">Appointed Vigil Hour</label>
+            <div class="grid grid-cols-3 gap-1.5">
+              <button type="button" class="set-vigil-opt py-1.5 rounded-lg border border-stone-700 font-mono text-center" data-val="00:30">12:30 AM</button>
+              <button type="button" class="set-vigil-opt py-1.5 rounded-lg border border-stone-700 font-mono text-center" data-val="02:30">2:30 AM</button>
+              <button type="button" class="set-vigil-opt py-1.5 rounded-lg border border-stone-700 font-mono text-center" data-val="04:00">4:00 AM</button>
+            </div>
+          </div>
+          <div class="pt-1">
+            <label class="flex items-center space-x-2 cursor-pointer pt-1">
+              <input type="checkbox" id="chk-manual-vigil-tonight" class="rounded text-amber-600 focus:ring-amber-500">
+              <span class="text-[11px]">Keep Vigil tonight manually (Extra devotion)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 5-Minute Chime Rules -->
+        <div>
+          <span class="font-bold block mb-1">5-Minute Pre-Office Chime</span>
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input type="checkbox" id="chk-chime-weekday-only" class="rounded text-amber-600 focus:ring-amber-500" checked>
+            <span>No chimes on Saturday or Sunday (Weekdays only)</span>
+          </label>
+        </div>
+
+        <!-- Office Schedule Hours -->
+        <div class="border-t border-stone-700/40 pt-2 space-y-2">
+          <span class="font-bold block">Office Schedule Hours</span>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] opacity-60 block">Morning Prayer</label>
+              <input type="time" id="set-time-morning" class="w-full p-2 rounded-lg subtle-bg border border-stone-700">
+            </div>
+            <div>
+              <label class="text-[10px] opacity-60 block">Midday Prayer</label>
+              <input type="time" id="set-time-midday" class="w-full p-2 rounded-lg subtle-bg border border-stone-700">
+            </div>
+            <div>
+              <label class="text-[10px] opacity-60 block">Evening Prayer</label>
+              <input type="time" id="set-time-evening" class="w-full p-2 rounded-lg subtle-bg border border-stone-700">
+            </div>
+            <div>
+              <label class="text-[10px] opacity-60 block">Compline</label>
+              <input type="time" id="set-time-compline" class="w-full p-2 rounded-lg subtle-bg border border-stone-700">
+            </div>
+          </div>
+        </div>
+
+        <!-- Discipline Cadences (Days) -->
+        <div class="border-t border-stone-700/40 pt-2 space-y-2">
+          <span class="font-bold block">Discipline Cadences (Days)</span>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] opacity-60 block">Confession (Days)</label>
+              <input type="number" id="set-cadence-confession" class="w-full p-2 rounded-lg subtle-bg border border-stone-700" min="1">
+            </div>
+            <div>
+              <label class="text-[10px] opacity-60 block">Adoration (Days)</label>
+              <input type="number" id="set-cadence-adoration" class="w-full p-2 rounded-lg subtle-bg border border-stone-700" min="1">
+            </div>
+            <div>
+              <label class="text-[10px] opacity-60 block">Act of Mercy (Days)</label>
+              <input type="number" id="set-cadence-mercy" class="w-full p-2 rounded-lg subtle-bg border border-stone-700" min="1">
+            </div>
+            <div>
+              <label class="text-[10px] opacity-60 block">Call Friend (Days)</label>
+              <input type="number" id="set-cadence-brotherhood" class="w-full p-2 rounded-lg subtle-bg border border-stone-700" min="1">
+            </div>
+            <div>
+              <label class="text-[10px] opacity-60 block">Spiritual Direction (Days)</label>
+              <input type="number" id="set-cadence-direction" class="w-full p-2 rounded-lg subtle-bg border border-stone-700" min="1">
+            </div>
+            <div>
+              <label class="text-[10px] opacity-60 block">Annual Retreat (Days)</label>
+              <input type="number" id="set-cadence-retreat" class="w-full p-2 rounded-lg subtle-bg border border-stone-700" min="1">
+            </div>
+            <div class="col-span-2">
+              <label class="text-[10px] opacity-60 block">Pilgrimage (Days)</label>
+              <input type="number" id="set-cadence-pilgrimage" class="w-full p-2 rounded-lg subtle-bg border border-stone-700" min="1">
+            </div>
+          </div>
+        </div>
+
+        <!-- Backup Data -->
+        <div class="border-t border-stone-700/40 pt-2">
+          <span class="font-bold block mb-1">Data Backup (Private & Local)</span>
+          <div class="flex space-x-2">
+            <button id="btn-export-json" class="flex-1 py-2 subtle-bg rounded-lg font-medium hover:opacity-80">Export Backup</button>
+            <label class="flex-1 py-2 subtle-bg rounded-lg font-medium text-center hover:opacity-80 cursor-pointer">
+              Import
+              <input type="file" id="input-import-json" class="hidden" accept=".json">
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button id="btn-save-settings" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TITHING MODAL SHEET -->
+  <div id="modal-tithe" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="card max-w-sm w-full p-4 rounded-2xl space-y-3 text-xs">
+      <div class="flex items-center justify-between border-b border-stone-700/40 pb-2">
+        <h3 class="font-bold font-serif-sacred text-base">Record Tithe / Alms</h3>
+        <button id="btn-close-tithe" class="text-stone-400">✕</button>
+      </div>
+      <div>
+        <label class="block opacity-70 mb-1">Amount ($)</label>
+        <input type="number" id="input-tithe-amount" step="0.01" placeholder="50.00" class="w-full p-2.5 rounded-xl subtle-bg border border-stone-700 text-base font-bold font-mono">
+      </div>
+      <div>
+        <label class="block opacity-70 mb-1">Recipient / Parish Note</label>
+        <input type="text" id="input-tithe-note" placeholder="St. Vincent of Saragossa Parish or Alms..." class="w-full p-2.5 rounded-xl subtle-bg border border-stone-700">
+      </div>
+      <div class="flex justify-end space-x-2 pt-1">
+        <button id="btn-save-tithe" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold">
+          Record Tithe
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- APP STATE & STORAGE ---
+    const DEFAULT_DATA = {
+      theme: 'candlelight',
+      chimeWeekdayOnly: true,
+      vigilTime: "00:30", // '00:30', '02:30', '04:00'
+      vigilTonightManual: false,
+      fastExemptToday: false,
+      personalReading: "",
+      officeTimes: {
+        morning: "07:00",
+        midday: "12:00",
+        evening: "18:00",
+        compline: "21:00"
+      },
+      disciplines: {
+        confession: { label: "Sacrament of Confession", cadenceDays: 14, lastDate: null },
+        adoration: { label: "Eucharistic Adoration", cadenceDays: 30, lastDate: null },
+        mercy: { label: "Act of Mercy", cadenceDays: 14, lastDate: null },
+        brotherhood: { label: "Call a Friend", cadenceDays: 7, lastDate: null },
+        direction: { label: "Spiritual Direction", cadenceDays: 30, lastDate: null },
+        retreat: { label: "Annual Silent Retreat", cadenceDays: 365, lastDate: null },
+        pilgrimage: { label: "Pilgrimage", cadenceDays: 365, lastDate: null }
+      },
+      tithingLog: [],
+      massHistory: [],
+      prayerList: [
+        { id: 1, text: "For St. Vincent of Saragossa parish & clergy", category: "Living" },
+        { id: 2, text: "For my godchildren and family", category: "Living" }
+      ],
+      officeHistory: {} // 'YYYY-MM-DD': { morning: true, midday: true, ... }
+    };
+
+    let app = loadData();
+
+    // Appointed Vigil Feasts (Strictly these only):
+    // 1. St. Vincent of Saragossa (Jan 22) - Patron of parish
+    // 2. Corpus Christi (Observed on Thursday after Trinity Sunday)
+    // 3. St. Clare of Assisi (Aug 11)
+    // 4. St. Mary the Virgin (Aug 15)
+    // 5. St. Thérèse of Lisieux (Oct 1)
+    // 6. St. Francis of Assisi (Oct 4)
+    const FIXED_VIGIL_FEASTS = [
+      { month: 0, day: 22, name: "St. Vincent of Saragossa (Patron)" },
+      { month: 7, day: 11, name: "St. Clare of Assisi" },
+      { month: 7, day: 15, name: "St. Mary the Virgin" },
+      { month: 9, day: 1, name: "St. Thérèse of Lisieux" },
+      { month: 9, day: 4, name: "St. Francis of Assisi" }
+    ];
+
+    function loadData() {
+      try {
+        const stored = localStorage.getItem('the_rule_app_data');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return Object.assign({}, DEFAULT_DATA, parsed);
+        }
+      } catch (e) {
+        console.error("Load failed", e);
+      }
+      return Object.assign({}, DEFAULT_DATA);
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem('the_rule_app_data', JSON.stringify(app));
+      } catch (e) {
+        console.error("Save failed", e);
+      }
+    }
+
+    function getTodayKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    // --- LITURGICAL CALENDAR & SEASONS ENGINE ---
+    // Computes Easter and liturgical movable days
+    function getEasterDate(year) {
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-indexed
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(year, month, day);
+    }
+
+    function getLiturgicalCalendarInfo() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const date = now.getDate();
+      const dayOfWeek = now.getDay(); // 0 = Sun, 5 = Fri
+
+      const easter = getEasterDate(year);
+      const today = new Date(year, month, date);
+      const diffDays = Math.round((today - easter) / (1000 * 60 * 60 * 24));
+
+      // Key Movable Days relative to Easter
+      const isAshWednesday = diffDays === -46;
+      const isGoodFriday = diffDays === -2;
+      const isHolyWeek = diffDays >= -7 && diffDays <= -1;
+      const isLent = diffDays >= -46 && diffDays < 0;
+      const isEastertide = diffDays >= 0 && diffDays <= 49;
+      const isCorpusChristi = diffDays === 60; // Thursday after Trinity Sunday (Easter + 60 days)
+
+      // Christmastide: Dec 25 through Jan 5
+      const isChristmastide = (month === 11 && date >= 25) || (month === 0 && date <= 5);
+
+      // Advent
+      let isAdvent = false;
+      if (month === 11 && date <= 24) isAdvent = true;
+
+      // Ember Days (Wed, Fri, Sat after: 1st Sun in Lent, Pentecost, Holy Cross Sept 14, St. Lucy Dec 13)
+      const isEmberDay = checkIsEmberDay(diffDays, month, date, dayOfWeek);
+
+      let season = "Ordinary Time";
+      let color = "bg-emerald-500";
+
+      if (isAdvent) {
+        season = "Advent";
+        color = "bg-purple-600";
+      } else if (isChristmastide) {
+        season = "Christmastide";
+        color = "bg-amber-300";
+      } else if (isLent) {
+        season = isHolyWeek ? "Holy Week" : "Lent";
+        color = "bg-purple-700";
+      } else if (isEastertide) {
+        season = "Eastertide";
+        color = "bg-amber-300";
+      }
+
+      return {
+        season,
+        color,
+        dayOfWeek,
+        isFriday: dayOfWeek === 5,
+        isAshWednesday,
+        isGoodFriday,
+        isHolyWeek,
+        isLent,
+        isEastertide,
+        isChristmastide,
+        isCorpusChristi,
+        isEmberDay
+      };
+    }
+
+    function checkIsEmberDay(diffDays, month, date, dayOfWeek) {
+      if (dayOfWeek !== 3 && dayOfWeek !== 5 && dayOfWeek !== 6) return false;
+      // Lent Ember days (diffDays -40 to -35)
+      if (diffDays >= -40 && diffDays <= -35) return true;
+      // Whitsun Ember days (diffDays 51 to 56)
+      if (diffDays >= 51 && diffDays <= 56) return true;
+      // Autumn Ember days (September after 14th)
+      if (month === 8 && date >= 15 && date <= 22) return true;
+      // Winter Ember days (December after 13th)
+      if (month === 11 && date >= 14 && date <= 21) return true;
+      return false;
+    }
+
+    // --- CHECK IF VIGIL IS APPOINTED TONIGHT ---
+    function checkVigilTonight() {
+      if (app.vigilTonightManual) {
+        return { isVigil: true, name: "Manual Watch" };
+      }
+      const now = new Date();
+      const m = now.getMonth();
+      const d = now.getDate();
+      const lit = getLiturgicalCalendarInfo();
+
+      if (lit.isCorpusChristi) {
+        return { isVigil: true, name: "Corpus Christi" };
+      }
+      const feast = FIXED_VIGIL_FEASTS.find(f => f.month === m && f.day === d);
+      if (feast) {
+        return { isVigil: true, name: feast.name };
+      }
+      return { isVigil: false, name: "" };
+    }
+
+    // --- RULE OF SELF-DENIAL (SECTION 7.1) EVALUATION ---
+    function evaluateSelfDenialRule() {
+      const lit = getLiturgicalCalendarInfo();
+
+      if (app.fastExemptToday) {
+        return {
+          code: "7.1 Dispensation",
+          title: "Fasting Exemption",
+          pill: "Exempt Dispensation",
+          quote: "Dispensation observed today for health, travel, or solemnity.",
+          clarification: "Rule of self-denial temporarily suspended."
+        };
+      }
+
+      // 7.1.1: Ash Wednesday & Good Friday
+      if (lit.isAshWednesday || lit.isGoodFriday) {
+        const dayName = lit.isAshWednesday ? "Ash Wednesday" : "Good Friday";
+        return {
+          code: "7.1.1",
+          title: `Strict Full Fast (${dayName})`,
+          pill: "Full Fast",
+          quote: `7.1.1. I shall observe a full fast on Ash Wednesday and Good Friday, no exceptions.`,
+          clarification: "Full fast appointed. No exceptions per Rule 7.1.1."
+        };
+      }
+
+      // 7.1.2: All Fridays except in Christmastide and Eastertide
+      if (lit.isFriday) {
+        if (lit.isChristmastide || lit.isEastertide) {
+          return {
+            code: "7.1.2",
+            title: "Friday Feasting (Christmastide / Eastertide)",
+            pill: "No Fast",
+            quote: `7.1.2. I shall observe a partial fast on all Fridays (Except in Christmastide and Eastertide), as health permits.`,
+            clarification: "The festal season suspends Friday abstinence."
+          };
+        } else {
+          return {
+            code: "7.1.2",
+            title: "Friday Partial Fast",
+            pill: "Partial Fast",
+            quote: `7.1.2. I shall observe a partial fast on all Fridays (Except in Christmastide and Eastertide), as health permits.`,
+            clarification: "Self-denial / abstinence from flesh meat. As health permits."
+          };
+        }
+      }
+
+      // 7.1.3: Lent, Holy Week, and Ember Days
+      if (lit.isHolyWeek || lit.isLent || lit.isEmberDay) {
+        let periodName = "Lenten Discipline";
+        if (lit.isHolyWeek) periodName = "Holy Week Discipline";
+        else if (lit.isEmberDay) periodName = "Ember Day Discipline";
+
+        return {
+          code: "7.1.3",
+          title: periodName,
+          pill: "Food Restriction",
+          quote: `7.1.3. I will restrict some food as a form of discipline during Lent, Holy Week, and the Ember Days, as health permits.`,
+          clarification: "Restrict appointed foods as ascetical self-denial. As health permits."
+        };
+      }
+
+      // Default Ordinary Day
+      return {
+        code: "7.1",
+        title: "Ordinary Temperance",
+        pill: "Non-Fast Day",
+        quote: "No specific fast appointed today. Maintain sobriety and moderation.",
+        clarification: "General ascetical moderation observed per Rule of Life."
+      };
+    }
+
+    // --- TIME UTILITIES ---
+    function timeStringToMinutes(str) {
+      if (!str) return 0;
+      const parts = str.split(':');
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    }
+
+    // Determine current active office
+    function getActiveOffice() {
+      const now = new Date();
+      const minutesNow = now.getHours() * 60 + now.getMinutes();
+      const vigilStatus = checkVigilTonight();
+
+      const mornMin = timeStringToMinutes(app.officeTimes.morning);
+      const midMin = timeStringToMinutes(app.officeTimes.midday);
+      const eveMin = timeStringToMinutes(app.officeTimes.evening);
+      const compMin = timeStringToMinutes(app.officeTimes.compline);
+
+      // ONLY show Vigils if it is an appointed vigil night AND before Morning Prayer
+      if (vigilStatus.isVigil && minutesNow < mornMin) {
+        return { key: 'vigils', title: `Vigils (${vigilStatus.name})`, icon: '🌙', time: app.vigilTime, isVigil: true };
+      }
+
+      if (minutesNow < mornMin) {
+        // Late night / early morning before Morning Prayer when NO vigil is kept:
+        // Points forward to Morning Prayer
+        return { key: 'morning', title: 'Morning Prayer', icon: '🌅', time: app.officeTimes.morning, isVigil: false };
+      } else if (minutesNow < midMin) {
+        return { key: 'morning', title: 'Morning Prayer', icon: '🌅', time: app.officeTimes.morning, isVigil: false };
+      } else if (minutesNow < eveMin) {
+        return { key: 'midday', title: 'Midday Prayer', icon: '☀️', time: app.officeTimes.midday, isVigil: false };
+      } else if (minutesNow < compMin) {
+        return { key: 'evening', title: 'Evening Prayer', icon: '🌆', time: app.officeTimes.evening, isVigil: false };
+      } else {
+        return { key: 'compline', title: 'Compline', icon: '✨', time: app.officeTimes.compline, isVigil: false };
+      }
+    }
+
+    // --- WEB AUDIO MONASTIC CHIME ---
+    function playChimeSound() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const partials = [392.00, 784.00, 1174.66, 1568.00];
+        const amps = [0.65, 0.28, 0.12, 0.05];
+
+        partials.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = i === 0 ? "sine" : "triangle";
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          gain.gain.setValueAtTime(amps[i], ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.8);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 4.0);
+        });
+      } catch (e) {
+        console.warn("Chime Audio error:", e);
+      }
+    }
+
+    // --- 5-MINUTE CHIME ENGINE (WEEKDAY ONLY) ---
+    let lastChimedMinute = -1;
+    function checkScheduledChimes() {
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 = Sun, 6 = Sat
+
+      // Check if chimes are weekend-silenced
+      if (app.chimeWeekdayOnly && (dayOfWeek === 0 || dayOfWeek === 6)) {
+        document.getElementById('chime-status-hint').textContent = "Weekend: Chimes silent by rule.";
+        document.getElementById('next-chime-time').textContent = "Silent";
+        return;
+      }
+
+      const currentMins = now.getHours() * 60 + now.getMinutes();
+      const vigilStatus = checkVigilTonight();
+
+      const scheduledMinutes = [
+        timeStringToMinutes(app.officeTimes.morning) - 5,
+        timeStringToMinutes(app.officeTimes.midday) - 5,
+        timeStringToMinutes(app.officeTimes.evening) - 5,
+        timeStringToMinutes(app.officeTimes.compline) - 5
+      ];
+
+      // Add Vigil chime only if vigil is appointed tonight
+      if (vigilStatus.isVigil) {
+        scheduledMinutes.push(timeStringToMinutes(app.vigilTime) - 5);
+      }
+
+      const normalized = scheduledMinutes.map(m => m < 0 ? m + 1440 : m);
+
+      let nextTarget = normalized.find(m => m > currentMins);
+      if (!nextTarget) nextTarget = normalized[0];
+
+      const nH = Math.floor(nextTarget / 60);
+      const nM = nextTarget % 60;
+      document.getElementById('next-chime-time').textContent = `${String(nH).padStart(2,'0')}:${String(nM).padStart(2,'0')}`;
+      document.getElementById('chime-status-hint').textContent = "Chime 5 min prior (Mon–Fri)";
+
+      if (normalized.includes(currentMins) && lastChimedMinute !== currentMins) {
+        lastChimedMinute = currentMins;
+        playChimeSound();
+      }
+    }
+
+    // --- LECTIONARY CITATIONS (BCP 2019 Daily lookup) ---
+    function getLectionaryCitations() {
+      const day = new Date().getDate();
+      return {
+        morningPsalm: `Psalms: ${day}, ${day + 1}`,
+        morningLessons: `1st: 1 Kings ${Math.min(22, day)} | 2nd: Eph ${(day % 6) + 1}`,
+        eveningPsalm: `Psalms: ${day + 2}, ${day + 3}`,
+        eveningLessons: `1st: 2 Chron ${Math.min(36, day)} | 2nd: Luke ${(day % 24) + 1}`
+      };
+    }
+
+    // --- RENDERING ROUTINES ---
+    function renderApp() {
+      renderHeader();
+      renderActiveOffice();
+      renderOfficeGrid();
+      renderReadings();
+      renderSelfDenial();
+      renderMassView();
+      renderDisciplinesView();
+      renderPrayersView();
+      renderCharts();
+    }
+
+    function renderHeader() {
+      const now = new Date();
+      document.getElementById('header-date').textContent = now.toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+      });
+
+      const lit = getLiturgicalCalendarInfo();
+      document.getElementById('liturgical-season-label').textContent = lit.season;
+      document.getElementById('liturgical-color-dot').className = `w-2 h-2 rounded-full inline-block ${lit.color}`;
+
+      const vigil = checkVigilTonight();
+      const vigilBadge = document.getElementById('vigil-today-badge');
+      if (vigil.isVigil) {
+        vigilBadge.classList.remove('hidden');
+        vigilBadge.textContent = `Vigil: ${vigil.name}`;
+      } else {
+        vigilBadge.classList.add('hidden');
+      }
+    }
+
+    function renderActiveOffice() {
+      const active = getActiveOffice();
+      document.getElementById('active-office-title').textContent = active.title;
+      document.getElementById('active-office-icon').textContent = active.icon;
+      document.getElementById('active-office-time').textContent = `Appointed Hour: ${active.time}`;
+
+      const vigilDutyBadge = document.getElementById('badge-vigil-duty');
+      if (active.isVigil) vigilDutyBadge.classList.remove('hidden');
+      else vigilDutyBadge.classList.add('hidden');
+
+      const todayKey = getTodayKey();
+      const todayHistory = app.officeHistory[todayKey] || {};
+      const isDone = !!todayHistory[active.key];
+      const btn = document.getElementById('btn-complete-active-office');
+
+      if (isDone) {
+        btn.innerHTML = "<span>✓</span><span>Completed</span>";
+        btn.classList.add('opacity-75');
+      } else {
+        btn.innerHTML = "<span>✓</span><span>Mark Done</span>";
+        btn.classList.remove('opacity-75');
+      }
+    }
+
+    function renderOfficeGrid() {
+      const container = document.getElementById('office-grid-container');
+      container.innerHTML = "";
+      const vigilStatus = checkVigilTonight();
+      const todayKey = getTodayKey();
+      const todayHistory = app.officeHistory[todayKey] || {};
+
+      // Dynamic list of offices: includes Vigils ONLY if appointed feast or manual
+      const list = [];
+      if (vigilStatus.isVigil) {
+        list.push({ key: 'vigils', label: 'Vigils', icon: '🌙', time: app.vigilTime });
+      }
+      list.push(
+        { key: 'morning', label: 'Morning', icon: '🌅', time: app.officeTimes.morning },
+        { key: 'midday', label: 'Midday', icon: '☀️', time: app.officeTimes.midday },
+        { key: 'evening', label: 'Evening', icon: '🌆', time: app.officeTimes.evening },
+        { key: 'compline', label: 'Compline', icon: '✨', time: app.officeTimes.compline }
+      );
+
+      // Adjust grid columns: 5 if vigil is kept, 4 otherwise
+      container.className = list.length === 5 ? "grid grid-cols-5 gap-1.5 text-center text-xs" : "grid grid-cols-4 gap-1.5 text-center text-xs";
+
+      list.forEach(off => {
+        const done = !!todayHistory[off.key];
+        const cell = document.createElement('div');
+        cell.className = `office-cell card p-2 rounded-xl transition cursor-pointer ${done ? 'border-amber-600/60 bg-amber-950/20' : ''}`;
+        cell.setAttribute('data-office', off.key);
+        cell.innerHTML = `
+          <span class="text-sm block">${off.icon}</span>
+          <span class="font-bold text-[11px] block mt-0.5 truncate">${off.label}</span>
+          <span class="text-[9px] opacity-65 block font-mono">${off.time}</span>
+          <span class="check-mark text-[10px] font-bold text-amber-500 ${done ? 'block' : 'hidden'}">✓</span>
+        `;
+        container.appendChild(cell);
+      });
+    }
+
+    function renderReadings() {
+      const lectionary = getLectionaryCitations();
+      document.getElementById('reading-morning-psalm').textContent = lectionary.morningPsalm;
+      document.getElementById('reading-morning-lessons').textContent = lectionary.morningLessons;
+      document.getElementById('reading-evening-psalm').textContent = lectionary.eveningPsalm;
+      document.getElementById('reading-evening-lessons').textContent = lectionary.eveningLessons;
+
+      document.getElementById('input-personal-reading').value = app.personalReading || "";
+    }
+
+    function renderSelfDenial() {
+      const rule = evaluateSelfDenialRule();
+      document.getElementById('fast-rule-number').textContent = rule.code;
+      document.getElementById('fast-title').textContent = rule.title;
+      document.getElementById('fast-pill').textContent = rule.pill;
+      document.getElementById('fast-rule-quote').textContent = rule.quote;
+      document.getElementById('fast-clarification').textContent = rule.clarification;
+
+      const exemptBtn = document.getElementById('btn-toggle-fast-exempt');
+      if (app.fastExemptToday) {
+        exemptBtn.textContent = "Exempt Active";
+        exemptBtn.className = "px-2 py-0.5 rounded text-[11px] bg-amber-700 text-white font-bold";
+      } else {
+        exemptBtn.textContent = "Exempt";
+        exemptBtn.className = "px-2 py-0.5 rounded text-[11px] border border-stone-700 subtle-bg hover:opacity-80";
+      }
+    }
+
+    // --- MASS VIEW ---
+    function renderMassView() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+
+      let yearCount = 0;
+      let monthCount = 0;
+
+      app.massHistory.forEach(dateStr => {
+        const d = new Date(dateStr);
+        if (d.getFullYear() === currentYear) yearCount++;
+        if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) monthCount++;
+      });
+
+      document.getElementById('mass-count-year').textContent = yearCount;
+      document.getElementById('mass-count-month').textContent = monthCount;
+      document.getElementById('mass-count-total').textContent = app.massHistory.length;
+
+      const list = document.getElementById('mass-history-list');
+      list.innerHTML = "";
+      if (app.massHistory.length === 0) {
+        list.innerHTML = `<p class="opacity-50 text-center py-2">No masses logged yet.</p>`;
+        return;
+      }
+
+      const recents = [...app.massHistory].reverse().slice(0, 6);
+      recents.forEach(dateStr => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between subtle-bg p-2.5 rounded-xl";
+        row.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="text-amber-500 font-bold">☩</span>
+            <span class="font-medium">${new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          </div>
+          <span class="text-[10px] opacity-60">Holy Eucharist Attended</span>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    // --- DISCIPLINES VIEW ---
+    function renderDisciplinesView() {
+      const container = document.getElementById('disciplines-container');
+      container.innerHTML = "";
+      const now = new Date();
+
+      Object.keys(app.disciplines).forEach(key => {
+        const d = app.disciplines[key];
+        let statusText = "Never recorded";
+        let isDue = true;
+
+        if (d.lastDate) {
+          const last = new Date(d.lastDate);
+          const daysAgo = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+          const remaining = d.cadenceDays - daysAgo;
+
+          if (remaining <= 0) {
+            statusText = `Due now (${daysAgo}d ago)`;
+            isDue = true;
+          } else {
+            statusText = `${remaining} days remaining (${daysAgo}d ago)`;
+            isDue = false;
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = "card p-3 rounded-2xl flex items-center justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <span class="font-bold text-xs">${d.label}</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${isDue ? 'bg-amber-900/60 text-amber-300' : 'subtle-bg opacity-70'}">
+                ${isDue ? 'DUE' : 'OK'}
+              </span>
+            </div>
+            <p class="text-[10px] opacity-65 mt-0.5">Cadence: every ${d.cadenceDays}d · ${statusText}</p>
+          </div>
+          <button class="btn-mark-discipline text-xs px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-white font-medium" data-discipline="${key}">
+            ✓ Done
+          </button>
+        `;
+        container.appendChild(card);
+      });
+
+      // Render Tithing
+      let ytdTotal = 0;
+      const currentYear = now.getFullYear();
+      app.tithingLog.forEach(t => {
+        if (new Date(t.date).getFullYear() === currentYear) ytdTotal += (parseFloat(t.amount) || 0);
+      });
+      document.getElementById('tithing-total-ytd').textContent = `$${ytdTotal.toFixed(2)} YTD`;
+
+      const tithingList = document.getElementById('tithing-recent-list');
+      tithingList.innerHTML = "";
+      const recents = [...app.tithingLog].reverse().slice(0, 3);
+      if (recents.length === 0) {
+        tithingList.innerHTML = `<p class="opacity-50">No tithes recorded yet.</p>`;
+      } else {
+        recents.forEach(t => {
+          const row = document.createElement('div');
+          row.className = "flex justify-between py-1 border-b border-stone-800/30";
+          row.innerHTML = `
+            <span>${t.date} (${t.note || 'Tithe'})</span>
+            <span class="font-bold font-mono text-amber-400">$${parseFloat(t.amount).toFixed(2)}</span>
+          `;
+          tithingList.appendChild(row);
+        });
+      }
+    }
+
+    // --- PRAYER INTENTIONS VIEW ---
+    function renderPrayersView() {
+      const list = document.getElementById('prayer-items-list');
+      list.innerHTML = "";
+      document.getElementById('prayer-count-label').textContent = `${app.prayerList.length} petitions`;
+
+      if (app.prayerList.length === 0) {
+        list.innerHTML = `<p class="opacity-50 text-center py-4">No active intentions. Add one above.</p>`;
+        return;
+      }
+
+      app.prayerList.forEach(p => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-2.5 subtle-bg rounded-xl";
+        item.innerHTML = `
+          <div class="flex items-center space-x-2 truncate">
+            <span class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase subtle-bg border border-stone-700">${p.category}</span>
+            <span class="truncate font-medium">${p.text}</span>
+          </div>
+          <button class="btn-delete-prayer text-stone-500 hover:text-red-400 px-1 text-xs" data-id="${p.id}">✕</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    // --- CHARTS & 30-DAY HEATMAP ---
+    function renderCharts() {
+      const canvas = document.getElementById('chart-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.parentElement.clientWidth;
+      const height = canvas.parentElement.clientHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const counts = [];
+      const labels = [];
+      const today = new Date();
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today.getTime() - i * 86400000);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const entry = app.officeHistory[k] || {};
+        let num = 0;
+        ['vigils', 'morning', 'midday', 'evening', 'compline'].forEach(o => {
+          if (entry[o]) num++;
+        });
+        counts.push(num);
+        labels.push(d.toLocaleDateString('en-US', { weekday: 'narrow' }));
+      }
+
+      const barWidth = Math.floor((width - 40) / 7) - 6;
+      counts.forEach((val, i) => {
+        const barH = (val / 5) * (height - 40);
+        const x = 20 + i * (barWidth + 8);
+        const y = height - 20 - barH;
+
+        ctx.fillStyle = val > 0 ? '#d97706' : '#3f3f46';
+        ctx.beginPath();
+        ctx.roundRect(x, y, barWidth, Math.max(3, barH), 4);
+        ctx.fill();
+
+        ctx.fillStyle = '#a1a1aa';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(labels[i], x + barWidth / 2, height - 6);
+
+        if (val > 0) {
+          ctx.fillStyle = '#d97706';
+          ctx.font = 'bold 9px Inter, sans-serif';
+          ctx.fillText(val, x + barWidth / 2, y - 3);
+        }
+      });
+
+      const heatmap = document.getElementById('heatmap-grid');
+      heatmap.innerHTML = "";
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(today.getTime() - i * 86400000);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const entry = app.officeHistory[k] || {};
+        let num = 0;
+        ['vigils', 'morning', 'midday', 'evening', 'compline'].forEach(o => {
+          if (entry[o]) num++;
+        });
+
+        const box = document.createElement('div');
+        box.className = "w-full aspect-square rounded-md";
+        box.title = `${k}: ${num} offices`;
+        if (num === 0) box.classList.add('bg-stone-800');
+        else if (num <= 2) box.classList.add('bg-amber-800');
+        else box.classList.add('bg-amber-500');
+        heatmap.appendChild(box);
+      }
+    }
+
+    // --- EVENT HANDLERS ---
+    function setupEvents() {
+      // Bottom Navigation Tabs
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.getAttribute('data-target');
+          document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+          document.getElementById(target).classList.remove('hidden');
+
+          document.querySelectorAll('.nav-tab').forEach(t => {
+            t.classList.remove('text-amber-500');
+            t.classList.add('opacity-60');
+          });
+          tab.classList.remove('opacity-60');
+          tab.classList.add('text-amber-500');
+
+          if (target === 'view-charts') setTimeout(renderCharts, 50);
+        });
+      });
+
+      // Mark Active Office Done
+      document.getElementById('btn-complete-active-office').addEventListener('click', () => {
+        const active = getActiveOffice();
+        const todayKey = getTodayKey();
+        if (!app.officeHistory[todayKey]) app.officeHistory[todayKey] = {};
+        app.officeHistory[todayKey][active.key] = !app.officeHistory[todayKey][active.key];
+        saveData();
+        playChimeSound();
+        renderActiveOffice();
+        renderOfficeGrid();
+        renderCharts();
+      });
+
+      // Office grid delegation
+      document.getElementById('office-grid-container').addEventListener('click', (e) => {
+        const cell = e.target.closest('.office-cell');
+        if (!cell) return;
+        const off = cell.getAttribute('data-office');
+        const todayKey = getTodayKey();
+        if (!app.officeHistory[todayKey]) app.officeHistory[todayKey] = {};
+        app.officeHistory[todayKey][off] = !app.officeHistory[todayKey][off];
+        saveData();
+        renderOfficeGrid();
+        renderActiveOffice();
+        renderCharts();
+      });
+
+      // Fasting exemption toggle
+      document.getElementById('btn-toggle-fast-exempt').addEventListener('click', () => {
+        app.fastExemptToday = !app.fastExemptToday;
+        saveData();
+        renderSelfDenial();
+      });
+
+      // Personal reading input
+      document.getElementById('input-personal-reading').addEventListener('input', (e) => {
+        app.personalReading = e.target.value;
+        saveData();
+      });
+
+      // Mass Tracker button
+      document.getElementById('btn-log-mass-today').addEventListener('click', () => {
+        const todayKey = getTodayKey();
+        if (!app.massHistory.includes(todayKey)) {
+          app.massHistory.push(todayKey);
+          saveData();
+          renderMassView();
+          playChimeSound();
+        }
+      });
+
+      // Disciplines mark done delegation
+      document.getElementById('disciplines-container').addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-mark-discipline');
+        if (!btn) return;
+        const key = btn.getAttribute('data-discipline');
+        app.disciplines[key].lastDate = getTodayKey();
+        saveData();
+        renderDisciplinesView();
+        playChimeSound();
+      });
+
+      // Tithing modal triggers
+      document.getElementById('btn-quick-tithing-modal').addEventListener('click', () => {
+        document.getElementById('modal-tithe').classList.remove('hidden');
+        document.getElementById('modal-tithe').classList.add('flex');
+      });
+      document.getElementById('btn-close-tithe').addEventListener('click', () => {
+        document.getElementById('modal-tithe').classList.add('hidden');
+        document.getElementById('modal-tithe').classList.remove('flex');
+      });
+      document.getElementById('btn-save-tithe').addEventListener('click', () => {
+        const amt = parseFloat(document.getElementById('input-tithe-amount').value);
+        const note = document.getElementById('input-tithe-note').value;
+        if (!isNaN(amt) && amt > 0) {
+          app.tithingLog.push({ date: getTodayKey(), amount: amt, note });
+          saveData();
+          renderDisciplinesView();
+          document.getElementById('modal-tithe').classList.add('hidden');
+          document.getElementById('modal-tithe').classList.remove('flex');
+          document.getElementById('input-tithe-amount').value = '';
+          document.getElementById('input-tithe-note').value = '';
+        }
+      });
+
+      // Prayer petitions list
+      document.getElementById('btn-add-prayer').addEventListener('click', () => {
+        const txt = document.getElementById('input-new-prayer').value.trim();
+        const cat = document.getElementById('select-prayer-category').value;
+        if (txt) {
+          app.prayerList.push({ id: Date.now(), text: txt, category: cat });
+          saveData();
+          renderPrayersView();
+          document.getElementById('input-new-prayer').value = '';
+        }
+      });
+
+      document.getElementById('prayer-items-list').addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-delete-prayer');
+        if (!btn) return;
+        const id = parseInt(btn.getAttribute('data-id'), 10);
+        app.prayerList = app.prayerList.filter(p => p.id !== id);
+        saveData();
+        renderPrayersView();
+      });
+
+      // Audio and Theme buttons
+      document.getElementById('btn-test-chime').addEventListener('click', playChimeSound);
+      document.getElementById('btn-cycle-theme').addEventListener('click', () => {
+        if (app.theme === 'candlelight') app.theme = 'light';
+        else if (app.theme === 'light') app.theme = 'dark';
+        else app.theme = 'candlelight';
+        applyTheme(app.theme);
+        saveData();
+      });
+
+      // Settings Modal Open/Close & Vigil Time options in settings
+      document.getElementById('btn-open-settings').addEventListener('click', () => {
+        document.getElementById('chk-chime-weekday-only').checked = app.chimeWeekdayOnly;
+        document.getElementById('chk-manual-vigil-tonight').checked = app.vigilTonightManual;
+
+        document.getElementById('set-time-morning').value = app.officeTimes.morning;
+        document.getElementById('set-time-midday').value = app.officeTimes.midday;
+        document.getElementById('set-time-evening').value = app.officeTimes.evening;
+        document.getElementById('set-time-compline').value = app.officeTimes.compline;
+
+        document.getElementById('set-cadence-confession').value = app.disciplines.confession.cadenceDays;
+        document.getElementById('set-cadence-adoration').value = app.disciplines.adoration.cadenceDays;
+        document.getElementById('set-cadence-mercy').value = app.disciplines.mercy.cadenceDays;
+        document.getElementById('set-cadence-brotherhood').value = app.disciplines.brotherhood.cadenceDays;
+        document.getElementById('set-cadence-direction').value = app.disciplines.direction.cadenceDays;
+        document.getElementById('set-cadence-retreat').value = app.disciplines.retreat.cadenceDays;
+        document.getElementById('set-cadence-pilgrimage').value = app.disciplines.pilgrimage.cadenceDays;
+
+        updateVigilSettingButtons(app.vigilTime);
+
+        document.getElementById('modal-settings').classList.remove('hidden');
+        document.getElementById('modal-settings').classList.add('flex');
+      });
+
+      document.querySelectorAll('.set-vigil-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          app.vigilTime = btn.getAttribute('data-val');
+          updateVigilSettingButtons(app.vigilTime);
+        });
+      });
+
+      document.getElementById('btn-close-settings').addEventListener('click', () => {
+        document.getElementById('modal-settings').classList.add('hidden');
+        document.getElementById('modal-settings').classList.remove('flex');
+      });
+
+      document.getElementById('btn-save-settings').addEventListener('click', () => {
+        app.chimeWeekdayOnly = document.getElementById('chk-chime-weekday-only').checked;
+        app.vigilTonightManual = document.getElementById('chk-manual-vigil-tonight').checked;
+
+        app.officeTimes.morning = document.getElementById('set-time-morning').value;
+        app.officeTimes.midday = document.getElementById('set-time-midday').value;
+        app.officeTimes.evening = document.getElementById('set-time-evening').value;
+        app.officeTimes.compline = document.getElementById('set-time-compline').value;
+
+        app.disciplines.confession.cadenceDays = parseInt(document.getElementById('set-cadence-confession').value) || 14;
+        app.disciplines.adoration.cadenceDays = parseInt(document.getElementById('set-cadence-adoration').value) || 30;
+        app.disciplines.mercy.cadenceDays = parseInt(document.getElementById('set-cadence-mercy').value) || 14;
+        app.disciplines.brotherhood.cadenceDays = parseInt(document.getElementById('set-cadence-brotherhood').value) || 7;
+        app.disciplines.direction.cadenceDays = parseInt(document.getElementById('set-cadence-direction').value) || 30;
+        app.disciplines.retreat.cadenceDays = parseInt(document.getElementById('set-cadence-retreat').value) || 365;
+        app.disciplines.pilgrimage.cadenceDays = parseInt(document.getElementById('set-cadence-pilgrimage').value) || 365;
+
+        saveData();
+        document.getElementById('modal-settings').classList.add('hidden');
+        document.getElementById('modal-settings').classList.remove('flex');
+        renderApp();
+      });
+
+      // Backup JSON Export & Import
+      document.getElementById('btn-export-json').addEventListener('click', () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app, null, 2));
+        const dl = document.createElement('a');
+        dl.setAttribute("href", dataStr);
+        dl.setAttribute("download", `the_rule_backup_${getTodayKey()}.json`);
+        document.body.appendChild(dl);
+        dl.click();
+        dl.remove();
+      });
+
+      document.getElementById('input-import-json').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            app = Object.assign({}, DEFAULT_DATA, JSON.parse(event.target.result));
+            saveData();
+            applyTheme(app.theme);
+            renderApp();
+            document.getElementById('modal-settings').classList.add('hidden');
+            document.getElementById('modal-settings').classList.remove('flex');
+          } catch (err) {
+            console.error("Invalid import file", err);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      window.addEventListener('resize', renderCharts);
+      setInterval(checkScheduledChimes, 30000);
+    }
+
+    function updateVigilSettingButtons(selectedVal) {
+      document.querySelectorAll('.set-vigil-opt').forEach(btn => {
+        if (btn.getAttribute('data-val') === selectedVal) {
+          btn.className = "set-vigil-opt py-1.5 rounded-lg bg-amber-600 text-white font-mono font-bold text-center";
+        } else {
+          btn.className = "set-vigil-opt py-1.5 rounded-lg border border-stone-700 font-mono text-center opacity-70";
+        }
+      });
+    }
+
+    function applyTheme(theme) {
+      document.body.className = `theme-${theme} min-h-screen flex flex-col pb-24 transition-colors duration-200`;
+      const icon = document.getElementById('theme-icon');
+      if (theme === 'candlelight') icon.textContent = '🕯️';
+      else if (theme === 'light') icon.textContent = '☀️';
+      else icon.textContent = '🌙';
+    }
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+      applyTheme(app.theme);
+      renderApp();
+      setupEvents();
+      checkScheduledChimes();
+    };
+  </script>
+</body>
+</html>
